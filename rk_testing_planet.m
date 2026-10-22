@@ -86,8 +86,12 @@ gravity_wrapper = @(t, V) gravity_rate_func(t, V, orbit_params);
 
 
 
-t_ref = [0, 30];
-h_step = logspace(-3, -1.2, 50);
+t_ref = [0, 3];
+h_step = logspace(-2, -1, 100);
+t_range = linspace(0,3,100);
+
+V_list = compute_planetary_motion(t_range,V0,orbit_params);
+
 
 XA = V0;
 gt = V_list(end,:);
@@ -98,9 +102,9 @@ rk4_err_list = [];
 
 
 for i = 1:length(h_step)
-    [emp_t_list,emp_X_list,emp_h_avg, emp_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,tspan,V0,h_step(i),emp_struct);
-    [h_t_list,h_X_list,h_h_avg, h_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,tspan,V0,h_step(i),h_struct);
-    [rk4_t_list,rk4_X_list,rk4_h_avg, rk4_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,tspan,V0,h_step(i),rk4_struct);
+    [emp_t_list,emp_X_list,emp_h_avg, emp_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,t_ref,V0,h_step(i),emp_struct);
+    [h_t_list,h_X_list,h_h_avg, h_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,t_ref,V0,h_step(i),h_struct);
+    [rk4_t_list,rk4_X_list,rk4_h_avg, rk4_num_evals] = explicit_RK_fixed_step_integration(gravity_wrapper,t_ref,V0,h_step(i),rk4_struct);
     
     XB_emp = emp_X_list(:,end);
     XB_h = h_X_list(:,end);
@@ -158,7 +162,7 @@ plot(h_step, f_rk4, '-', LineWidth=3, Color="k")
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
+% legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
 xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
 ylabel("Global Truncation Error (-)", Interpreter="latex", FontSize=14)
 %axis([0 4*pi -1.5 1.5])

@@ -19,6 +19,6 @@ function dVdt = gravity_rate_func(t,V,orbit_params)
     d2xdt2_p = (-m1*g / (V(1)^2 + V(2)^2)^(3/2)) * V(1);
     d2ydt2_p = (-m1*g / (V(1)^2 + V(2)^2)^(3/2)) * V(2);
 
-    dVdt = [V(3);V(4);d2xdt2_p;d2ydt2_p];
+    dVdt = [V(3),V(4),d2xdt2_p,d2ydt2_p];
 
 end

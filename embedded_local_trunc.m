@@ -3,9 +3,9 @@ BT_struct = butcher_tableau("HeunEuler");
 
 
 % Constants
-tref = 10;
-h_ref = .01;
-X0 = 1;
+t_ref = 0;
+h_step = logspace(1, 3, 100);
+% X0 = 1;
 
 orbit_params = struct();
 orbit_params.m_sun = 1;
@@ -20,7 +20,8 @@ V0 = [x0;y0;dxdt0;dydt0];
 % t_range = linspace(0,30,100);
 % V_list = compute_planetary_motion(t_range,V0,orbit_params);
 % 
-    
+
+%X0 = compute_planetary_motion()
 
 gravity_wrapper = @(t, V) gravity_rate_func(t, V, orbit_params);
 
@@ -29,11 +30,16 @@ XB2_err_list = [];
 diff_err_list = [];
 gt_err_list = [];
 
+% X0 = gravity_wrapper(t_ref, V0);
+
 
 for i = 1:length(h_step)
-    gt = gravity_wrapper(t_ref + h_step(i), V0);
+    gt = compute_planetary_motion(t_ref + h_step(i), V0, orbit_params);
+    % gt
 
    [XB1, XB2, num_evals] = RK_step_embedded(gravity_wrapper,t_ref,V0,h_step(i),BT_struct);
+   % XB1
+   % XB2
 
     XB1_err_list = [XB1_err_list, norm(XB1 - gt')];
     XB2_err_list = [XB2_err_list, norm(XB2 - gt')];
@@ -52,10 +58,12 @@ end
 % 
 % filtered_gt_err = func1_gt_err_list(1:filt_length);
 % 
-% mp_p = polyfit(log(filtered_h_step), log(filtered_mp_err), 1)
-% fe_p = polyfit(log(filtered_h_step), log(filtered_fe_err), 1)
-% 
-% gt_p = polyfit(log(filtered_h_step), log(filtered_gt_err), 1)
+XB1_p = polyfit(log(h_step), log(XB1_err_list), 1)
+XB2_p = polyfit(log(h_step), log(XB2_err_list), 1)
+diff_p = polyfit(log(h_step), log(diff_err_list), 1)
+
+
+gt_p = polyfit(log(h_step), log(gt_err_list), 1)
 % 
 % f_func1_mp = exp(polyval(mp_p, log(filtered_h_step)));
 % f_func1_fe = exp(polyval(fe_p, log(filtered_h_step)));
@@ -75,13 +83,13 @@ scatter(h_step, gt_err_list, 50, "filled", "k");
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-% legend(["Explicit Midpoint Measured","Forward Euler Measured", "Ground Truth Measured"], Location = "southeast", Interpreter="latex", FontSize=16)
+legend(["XB1 Measured","XB2 Measured", "XB1-XB2 Measured", "Ground Truth Measured"], Location = "northwest", Interpreter="latex", FontSize=16)
 xlabel("Time Step $h$ (-)", Interpreter="latex", FontSize=16)
 ylabel("Local Truncation Error (-)", Interpreter="latex", FontSize=16)
 % axis([0 4*pi -1.5 1.5])
-title("Local Truncation Error vs. Step Size: Explicit Methods", Interpreter='latex', FontSize=18)
+title("Local Truncation Error vs. Step Size", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';
 ax.YAxis.TickLabelInterpreter = 'Latex';
-% exportgraphics(gca, 'plots/explicit_methods_local_error_testfunc1.png', 'Resolution',300)
+exportgraphics(gca, 'plots/embedded_local_trunc_error.png', 'Resolution',300)

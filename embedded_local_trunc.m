@@ -1,9 +1,9 @@
-BT_struct = butcher_tableau("HeunEuler");
+BT_struct = butcher_tableau("Bogacki");
 
 
 
 % Constants
-t_ref = 0;
+t_ref = 10;
 h_step = logspace(1, 3, 100);
 % X0 = 1;
 
@@ -21,8 +21,6 @@ V0 = [x0;y0;dxdt0;dydt0];
 % V_list = compute_planetary_motion(t_range,V0,orbit_params);
 % 
 
-%X0 = compute_planetary_motion()
-
 gravity_wrapper = @(t, V) gravity_rate_func(t, V, orbit_params);
 
 XB1_err_list = [];
@@ -30,16 +28,12 @@ XB2_err_list = [];
 diff_err_list = [];
 gt_err_list = [];
 
-% X0 = gravity_wrapper(t_ref, V0);
-
+X0 = compute_planetary_motion(t_ref, V0, orbit_params);
 
 for i = 1:length(h_step)
-    gt = compute_planetary_motion(t_ref + h_step(i), V0, orbit_params);
-    % gt
+    gt = compute_planetary_motion(t_ref + h_step(i), X0, orbit_params);
 
-   [XB1, XB2, num_evals] = RK_step_embedded(gravity_wrapper,t_ref,V0,h_step(i),BT_struct);
-   % XB1
-   % XB2
+   [XB1, XB2, num_evals] = RK_step_embedded(gravity_wrapper,t_ref,X0,h_step(i),BT_struct);
 
     XB1_err_list = [XB1_err_list, norm(XB1 - gt')];
     XB2_err_list = [XB2_err_list, norm(XB2 - gt')];
@@ -87,7 +81,7 @@ legend(["XB1 Measured","XB2 Measured", "XB1-XB2 Measured", "Ground Truth Measure
 xlabel("Time Step $h$ (-)", Interpreter="latex", FontSize=16)
 ylabel("Local Truncation Error (-)", Interpreter="latex", FontSize=16)
 % axis([0 4*pi -1.5 1.5])
-title("Local Truncation Error vs. Step Size", Interpreter='latex', FontSize=18)
+title("Local Truncation Error vs. Step Size: Bogaki", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';

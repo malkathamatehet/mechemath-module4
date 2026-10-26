@@ -4,7 +4,7 @@ BT_struct = butcher_tableau("DormandPrince");
 
 % Constants
 t_ref = 0;
-h_step = logspace(-3, 1, 100);
+h_step = logspace(-1, 0, 100);
 % X0 = 1;
 
 orbit_params = struct();
@@ -35,11 +35,13 @@ for i = 1:length(h_step)
 
    [XB1, XB2, num_evals] = RK_step_embedded(gravity_wrapper,t_ref,X0,h_step(i),BT_struct);
 
-    XB1_err_list = [XB1_err_list, norm(XB1 - gt')];
-    XB2_err_list = [XB2_err_list, norm(XB2 - gt')];
+
+
+    XB1_err_list = [XB1_err_list, norm(XB1 - gt)];
+    XB2_err_list = [XB2_err_list, norm(XB2 - gt)];
     diff_err_list = [diff_err_list, norm(XB1 - XB2)];
 
-    gt_err_list = [gt_err_list, norm(gt' - X0)];
+    gt_err_list = [gt_err_list, norm(gt - X0)];
 
 
 end
@@ -77,11 +79,11 @@ scatter(h_step, gt_err_list, 50, "filled", "k");
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-legend(["XB1 Measured","XB2 Measured", "XB1-XB2 Measured", "Ground Truth Measured"], Location = "northwest", Interpreter="latex", FontSize=16)
+legend(["XB1 Measured","XB2 Measured", "XB1-XB2 Measured", "Ground Truth Measured"], Location = "southeast", Interpreter="latex", FontSize=16)
 xlabel("Time Step $h$ (-)", Interpreter="latex", FontSize=16)
 ylabel("Local Truncation Error (-)", Interpreter="latex", FontSize=16)
-% axis([0 4*pi -1.5 1.5])
-title("Local Truncation Error vs. Step Size: Bogaki", Interpreter='latex', FontSize=18)
+% axis([1e-1.5 1e0.5 1e-6 1e2])
+title("Local Truncation Error vs. Step Size: Dormand-Prince", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';

@@ -1,10 +1,10 @@
-BT_struct = butcher_tableau("Bogacki");
+BT_struct = butcher_tableau("DormandPrince");
 
 
 
 % Constants
-t_ref = 10;
-h_step = logspace(1, 3, 100);
+t_ref = 0;
+h_step = logspace(-3, 1, 100);
 % X0 = 1;
 
 orbit_params = struct();
@@ -39,7 +39,7 @@ for i = 1:length(h_step)
     XB2_err_list = [XB2_err_list, norm(XB2 - gt')];
     diff_err_list = [diff_err_list, norm(XB1 - XB2)];
 
-    gt_err_list = [gt_err_list, norm(gt' - V0)];
+    gt_err_list = [gt_err_list, norm(gt' - X0)];
 
 
 end

@@ -22,24 +22,37 @@
 %h_next: the time-step size at the next iteration
 %redo: False if the estimated error was less than error_desired
 % True if the estimated error was larger than error_desired
-function [X1_list, X2_list, num_evals] = explicit_RK_variable_step_test...
-(rate_func_in,tspan,X0,h_ref,BT_struct)
-    n_steps = ceil((tspan(2)-tspan(1))/h_ref);
+function [XB, num_evals, h_next, redo] = explicit_RK_variable_step(rate_func_in,t,XA,h,BT_struct,p,error_desired)
 
-    h_avg = (tspan(2) - tspan(1))/n_steps;
-    num_evals = 0;
-    XA = X0;
-    t_list = linspace(tspan(1), tspan(2), n_steps+1);
-    X1_list = [XA];
-    X2_list = [XA];
-    
-    for i = 1:n_steps
-        [XB1, XB2, evals] = RK_step_embedded(rate_func_in, t_list(i), XA, h_avg, BT_struct);
-        num_evals = num_evals + evals;
-        X1_list = [X1_list, XB1];
-        X2_list = [X2_list, XB2];
-        
-        XA = XB2;
+    a = BT_struct.A;
+    b = BT_struct.B;
+    c = BT_struct.C;
+
+    alpha = 1.5;
+
+    k = zeros(length(c), length(XA));
+
+    for i = 1:length(c)
+
+        sum_as = (a(i, :)) * k;
+
+        k(i, :) = rate_func_in(t + c(i)*h, XA + h*sum_as');
+
     end
 
+    XB1 = XA + (h*b(1,:)*k)';
+    XB2 = XA + (h*b(2,:)*k)';
+
+    calc_error = norm(XB1-XB2);
+
+    if calc_error >= error_desired
+        redo = 1;
+    else
+        redo = 0; 
+    end
+
+
+    h_next = min(0.9*(error_desired/calc_error)^(1/p), alpha) * h;
+    XB = XB2;
+    num_evals = length(k(1, :)); 
 end

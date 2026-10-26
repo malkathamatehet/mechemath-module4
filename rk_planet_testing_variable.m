@@ -54,7 +54,7 @@ end
 
 
 % t_ref = [0, 30];
-h_step = logspace(-3, 0, 100);
+h_step = logspace(-3, -1.5, 100);
 t_range = linspace(tspan(1),tspan(2),100);
 t_ref = [tspan(1), tspan(2)];
 
@@ -81,76 +81,87 @@ for i = 1:length(h_step)
 end
 
 
+filtered_h_step = step_size_list(step_size_list <= 1e-1);
+filt_length = length(filtered_h_step);
 
-% emp_p = polyfit(log(h_step), log(emp_err_list), 1)
-% f_emp = exp(polyval(emp_p, log(h_step)));
-% 
-% h_p = polyfit(log(h_step), log(h_err_list), 1)
-% f_h = exp(polyval(h_p, log(h_step)));
-% 
-% rk4_p = polyfit(log(h_step), log(rk4_err_list), 1)
-% f_rk4 = exp(polyval(rk4_p, log(h_step)));
-% 
+filtered_global_error = global_error_list(1:filt_length);
+
+emp_p = polyfit(log(h_step), log(emp_err_list), 1)
+f_emp = exp(polyval(emp_p, log(h_step)));
+
+v_p = polyfit(log(filtered_h_step), log(filtered_global_error), 1)
+f_v = exp(polyval(v_p, log(filtered_h_step)));
 
 figure();
 scatter(h_step, emp_err_list, 60,'filled',"r")
 hold on
-scatter(step_size_list, global_error_list ,60,'filled',"b")
+scatter(filtered_h_step, filtered_global_error ,60,'filled',"b")
+plot(h_step, f_emp, '-', LineWidth=3, Color="k")
+plot(filtered_h_step, f_v, '-', LineWidth=3, Color="k")
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-% legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
+legend(["Fixed Timestep","Variable Timestep", "Fit Lines"], Location = "northwest", Interpreter="latex", FontSize=14)
 xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
 ylabel("Global Truncation Error (-)", Interpreter="latex", FontSize=14)
 %axis([0 4*pi -1.5 1.5])
-title("Global Truncation Error vs Step Size", Interpreter='latex', FontSize=18)
+title("Global Truncation Error vs Fixed and Variable Step Sizes: Bogacki", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';
 ax.YAxis.TickLabelInterpreter = 'Latex';
-% exportgraphics(gca, 'plots/global_error.png', 'Resolution',300)
+exportgraphics(gca, 'plots/fixed_variable_global_error_timestep_comparison.png', 'Resolution',300)
 
+%% 
+
+filtered_func_eval = func_eval_list(1:filt_length);
+v_p = polyfit(log(filtered_func_eval), log(filtered_global_error), 1)
+f_v = exp(polyval(v_p, log(filtered_func_eval)));
+
+emp_p = polyfit(log(emp_eval_list), log(emp_err_list), 1)
+f_emp = exp(polyval(emp_p, log(emp_eval_list)));
 
 figure();
 scatter(emp_eval_list, emp_err_list, 60,'filled',"r")
 hold on
-scatter(func_eval_list, global_error_list ,60,'filled',"b")
+scatter(filtered_func_eval, filtered_global_error ,60,'filled',"b")
+plot(emp_eval_list, f_emp, '-', LineWidth=3, Color="k")
+plot(filtered_func_eval, f_v, '-', LineWidth=3, Color="k")
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-% legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
-xlabel("Function Evaluations", Interpreter="latex", FontSize=14)
+legend(["Fixed Timestep","Variable Timestep", "Fit Lines"], Location = "northeast", Interpreter="latex", FontSize=14)
+xlabel("Function Evaluations (-)", Interpreter="latex", FontSize=14)
 ylabel("Global Truncation Error (-)", Interpreter="latex", FontSize=14)
 %axis([0 4*pi -1.5 1.5])
-title("Global Truncation Error vs Function Evaluations", Interpreter='latex', FontSize=18)
+title("Global Truncation Error vs Fixed and Variable Function Evaluations: Bogacki", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';
 ax.YAxis.TickLabelInterpreter = 'Latex';
-% exportgraphics(gca, 'plots/global_error.png', 'Resolution',300)
+exportgraphics(gca, 'plots/fixed_variable_global_error_evals_comparison.png', 'Resolution',300)
+%% 
 
 
 figure();
-length(step_size_list)
-length(failure_list)
-scatter(step_size_list, failure_list, 60,'filled',"r")
-hold on
+scatter(step_size_list, failure_list*100, 60,'filled',"k")
 set(gca,'xscale','log')
 set(gca,'yscale','linear')
 % legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
 xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
-ylabel("Failure Rate", Interpreter="latex", FontSize=14)
+ylabel("Failure Rate ($\%$)", Interpreter="latex", FontSize=14)
 %axis([0 4*pi -1.5 1.5])
-title("Global Truncation Error vs Step Size", Interpreter='latex', FontSize=18)
+title("Failure Rate vs Avg. Step Size: Bogacki", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';
 ax.YAxis.TickLabelInterpreter = 'Latex';
-% exportgraphics(gca, 'plots/global_error.png', 'Resolution',300)
+exportgraphics(gca, 'plots/var_st_si_err_ra.png', 'Resolution',300)
 
 %% 
 
 % Constants
+tmax = 30;
 tspan = [0 tmax];
 h_ref = .01;
 X0 = 1;
@@ -186,7 +197,7 @@ nexttile(tcl);
 hold on
 
 plot(t_range, V_list(:, 1), 'k', LineWidth=5);
-plot(v_t_list, v_X_list(1, :), 'o',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2);
+plot(v_t_list, v_X_list(1, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:10:length(v_X_list(1, :)));
 xlabel("Time (-)", Interpreter="latex", FontSize=14)
 ylabel("x position (-)", Interpreter="latex", FontSize=14)
 hold off;
@@ -194,8 +205,8 @@ hold off;
 nexttile(tcl);
 hold on
 plot(t_range, V_list(:, 2), 'k', LineWidth=5);
-plot(v_t_list, v_X_list(2, :), 'o',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2);
-xlabel("Time (sec)", Interpreter="latex", FontSize=14)
+plot(v_t_list, v_X_list(2, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:10:length(v_X_list(2, :)));
+xlabel("Time (-)", Interpreter="latex", FontSize=14)
 ylabel("y position (-)", Interpreter="latex", FontSize=14)
 hold off;
 
@@ -203,19 +214,21 @@ sgtitle("X and Y Positions Over Time", Interpreter='latex', FontSize=15)
 hl = legend(["Ground Truth" "Variable Timestep"],Interpreter='latex', FontSize=15);
 hl.Layout.Tile = 'South';
 % 
-% exportgraphics(f, 'plots/x_y_pos.png', 'Resolution',300)
+% exportgraphics(f, 'plots/variable_step_size_x_y_pos.png', 'Resolution',300)
+%% 
 
 f = figure();
-scatter(step_single_error, r_list, 60,'filled',"r");
+plot(r_list, step_single_error,"o", MarkerFaceColor='k', MarkerEdgeColor='k', MarkerIndices=1:100:length(r_list));
 hold on
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-% legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
-xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
-ylabel("Distance", Interpreter="latex", FontSize=14)
+ylabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
+xlabel("Distance (-)", Interpreter="latex", FontSize=14)
 %axis([0 4*pi -1.5 1.5])
-title("-", Interpreter='latex', FontSize=18)
+title("Avg. Step Size vs Distance from the Sun: Bogacki", Interpreter='latex', FontSize=18)
 ax = gca;
 ax.FontSize = 16;
 ax.XAxis.TickLabelInterpreter = 'Latex';
 ax.YAxis.TickLabelInterpreter = 'Latex';
+exportgraphics(f, 'plots/dist_from_sun.png', 'Resolution',300)
+

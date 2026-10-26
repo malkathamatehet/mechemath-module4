@@ -23,29 +23,32 @@
 %redo: False if the estimated error was less than error_desired
 % True if the estimated error was larger than error_desired
 function [XB, num_evals, h_next, redo] = explicit_RK_variable_step(rate_func_in,t,XA,h,BT_struct,p,error_desired)
+    % 
+    % a = BT_struct.A;
+    % b = BT_struct.B;
+    % c = BT_struct.C;
+    % 
+    % k = zeros(length(c), length(XA));
+    % 
+    % for i = 1:length(c)
+    % 
+    %     sum_as = (a(i, :)) * k;
+    % 
+    %     k(i, :) = rate_func_in(t + c(i)*h, XA + h*sum_as');
+    % 
+    % end
+    % 
+    % XB1 = XA + (h*b(1,:)*k)';
+    % XB2 = XA + (h*b(2,:)*k)';
 
-    a = BT_struct.A;
-    b = BT_struct.B;
-    c = BT_struct.C;
 
-    alpha = 1.5;
+    alpha = 100;
 
-    k = zeros(length(c), length(XA));
-
-    for i = 1:length(c)
-
-        sum_as = (a(i, :)) * k;
-
-        k(i, :) = rate_func_in(t + c(i)*h, XA + h*sum_as');
-
-    end
-
-    XB1 = XA + (h*b(1,:)*k)';
-    XB2 = XA + (h*b(2,:)*k)';
+    [XB1, XB2, num_evals] = RK_step_embedded(rate_func_in,t,XA,h,BT_struct);
 
     calc_error = norm(XB1-XB2);
 
-    if calc_error >= error_desired
+    if calc_error > error_desired
         redo = 1;
     else
         redo = 0; 
@@ -53,6 +56,7 @@ function [XB, num_evals, h_next, redo] = explicit_RK_variable_step(rate_func_in,
 
 
     h_next = min(0.9*(error_desired/calc_error)^(1/p), alpha) * h;
-    XB = XB2;
-    num_evals = length(k(1, :)); 
+    XB = XB1;
+
+    % num_evals = length(k(1, :)); 
 end

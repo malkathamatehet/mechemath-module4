@@ -1,7 +1,8 @@
-BT_struct = butcher_tableau("HeunEuler");
+BT_struct = butcher_tableau("Bogacki");
 
+tmax = 30;
 % Constants
-tspan = [0 30];
+tspan = [0 tmax];
 h_ref = .01;
 X0 = 1;
 
@@ -15,7 +16,7 @@ dxdt0 = 0;
 dydt0 = 1.05;
 
 V0 = [x0;y0;dxdt0;dydt0];
-t_range = linspace(0,30,100);
+t_range = linspace(0,tmax,100);
 V_list = compute_planetary_motion(t_range,V0,orbit_params);
 gt = V_list(end,:);
     
@@ -24,7 +25,7 @@ error_desired = 1e-3;
 
 gravity_wrapper = @(t, V) gravity_rate_func(t, V, orbit_params);
 
-desired_error_list = logspace(-8, -5, 100);
+desired_error_list = logspace(-6, -2, 100);
 
 global_error_list = [];
 step_size_list = [];
@@ -130,10 +131,12 @@ ax.YAxis.TickLabelInterpreter = 'Latex';
 
 
 figure();
+length(step_size_list)
+length(failure_list)
 scatter(step_size_list, failure_list, 60,'filled',"r")
 hold on
 set(gca,'xscale','log')
-set(gca,'yscale','log')
+set(gca,'yscale','linear')
 % legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
 xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
 ylabel("Failure Rate", Interpreter="latex", FontSize=14)
@@ -148,7 +151,7 @@ ax.YAxis.TickLabelInterpreter = 'Latex';
 %% 
 
 % Constants
-tspan = [0 30];
+tspan = [0 tmax];
 h_ref = .01;
 X0 = 1;
 
@@ -161,6 +164,10 @@ gravity_wrapper = @(t, V) gravity_rate_func(t, V, orbit_params);
 desired_error = 1e-8;
 
 [v_t_list,v_X_list,v_h_avg, v_num_evals, failure_rate] = explicit_RK_variable_step_integration(gravity_wrapper,tspan,V0,h_ref,BT_struct,p,desired_error);
+r_list = sqrt(v_X_list(1, :).^2 + v_X_list(2, :).^2);
+step_single_error = tspan(1);
+step_single_error = [step_single_error, diff(v_t_list)];
+
 % 
 figure();
 axis equal; axis square;
@@ -197,3 +204,18 @@ hl = legend(["Ground Truth" "Variable Timestep"],Interpreter='latex', FontSize=1
 hl.Layout.Tile = 'South';
 % 
 % exportgraphics(f, 'plots/x_y_pos.png', 'Resolution',300)
+
+f = figure();
+scatter(step_single_error, r_list, 60,'filled',"r");
+hold on
+set(gca,'xscale','log')
+set(gca,'yscale','log')
+% legend(["Explicit Midpoint Measured","Heun's 3rd Order Measured", "Runge-Kutta 4th Order Measured", "Fit Lines"], Location = "southeast", Interpreter="latex", FontSize=14)
+xlabel("Time Step - $h$ (-)", Interpreter="latex", FontSize=14)
+ylabel("Distance", Interpreter="latex", FontSize=14)
+%axis([0 4*pi -1.5 1.5])
+title("-", Interpreter='latex', FontSize=18)
+ax = gca;
+ax.FontSize = 16;
+ax.XAxis.TickLabelInterpreter = 'Latex';
+ax.YAxis.TickLabelInterpreter = 'Latex';

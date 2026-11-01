@@ -79,7 +79,7 @@ scatter(h_step, gt_err_list, 50, "filled", "k");
 hold off
 set(gca,'xscale','log')
 set(gca,'yscale','log')
-legend(["XB1 Measured","XB2 Measured", "XB1-XB2 Measured", "Ground Truth Measured"], Location = "southeast", Interpreter="latex", FontSize=16)
+legend(["Higher Order Error Measured","Lower Order Error Measured", "Error Difference Measured", "Ground Truth Measured"], Location = "southeast", Interpreter="latex", FontSize=14)
 xlabel("Time Step $h$ (-)", Interpreter="latex", FontSize=16)
 ylabel("Local Truncation Error (-)", Interpreter="latex", FontSize=16)
 % axis([1e-1.5 1e0.5 1e-6 1e2])

@@ -197,7 +197,7 @@ nexttile(tcl);
 hold on
 
 plot(t_range, V_list(:, 1), 'k', LineWidth=5);
-plot(v_t_list, v_X_list(1, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:10:length(v_X_list(1, :)));
+plot(v_t_list, v_X_list(1, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:150:length(v_X_list(1, :)));
 xlabel("Time (-)", Interpreter="latex", FontSize=14)
 ylabel("x position (-)", Interpreter="latex", FontSize=14)
 hold off;
@@ -205,16 +205,16 @@ hold off;
 nexttile(tcl);
 hold on
 plot(t_range, V_list(:, 2), 'k', LineWidth=5);
-plot(v_t_list, v_X_list(2, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:10:length(v_X_list(2, :)));
+plot(v_t_list, v_X_list(2, :), 'ro-',markerfaceColor='r',MarkerEdgeColor='r', LineWidth=2, MarkerIndices=1:150:length(v_X_list(2, :)));
 xlabel("Time (-)", Interpreter="latex", FontSize=14)
 ylabel("y position (-)", Interpreter="latex", FontSize=14)
 hold off;
 
-sgtitle("X and Y Positions Over Time", Interpreter='latex', FontSize=15)
+sgtitle("Variable Timestep Clustering Visualization: Bogacki", Interpreter='latex', FontSize=15)
 hl = legend(["Ground Truth" "Variable Timestep"],Interpreter='latex', FontSize=15);
 hl.Layout.Tile = 'South';
 % 
-% exportgraphics(f, 'plots/variable_step_size_x_y_pos.png', 'Resolution',300)
+exportgraphics(f, 'plots/variable_step_size_x_y_pos.png', 'Resolution',300)
 %% 
 
 f = figure();
